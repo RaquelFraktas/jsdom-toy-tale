@@ -27,7 +27,7 @@ document.addEventListener("DOMContentLoaded", () => {
       let button = document.createElement('button');
         button.className= "like-btn";
         button.innerText= "like";
-        button.addEventListener("click", addLikes)
+        button.addEventListener("click", e => addLikes(e, toy.id))
       
       let cardDiv = document.createElement('div');
       cardDiv.className = "card";
@@ -71,38 +71,21 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  function addLikes(event){
+  function addLikes(event, id){
+    let numLikes = parseInt(event.target.parentElement.querySelector("p").innerText)
      event.preventDefault()
-     event.fetch("http://localhost:3000/toys/:id",{
-      method: "POST",
+     fetch(`http://localhost:3000/toys/${id}`,{
+      method: "PATCH",
       headers: {
         "Content-Type": "application/json",
-        Accept: "application/json"
+        "Accept": "application/json"
       },  
       body: JSON.stringify({
-        "likes": like(event)
-      }
-      )
-      .then(function(response){
-        return response.json();
+        "likes": numLikes +1
       })
-      .then(function(obj){
-        console.log(obj)
-      })
-   })
-  }
-
-  function like(e){
-    // e.preventDefault()
-    console.log(e)
-    e.addEventListener("dbClick", function(){
-      e.target -= e.likes.count;
-    }) 
-    e.addEventListener("click", function(){
-      e.target += e.likes
     })
-      
-    
+      .then(response => response.json())
+      .then(obj => event.target.parentElement.querySelector("p").innerText= obj.likes)
   }
 
   function forEachToy(toys){toys.forEach((toy) => {renderToys(toy)})}
