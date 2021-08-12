@@ -11,29 +11,29 @@ document.addEventListener("DOMContentLoaded", () => {
       return response.json()
     })
     .then(result => {
-      renderToys(result)
+      forEachToy(result)
     });
 
-  function renderToys(toys){
-  toys.forEach ((toy) =>{
-      let cardDiv = document.createElement('div');
-        cardDiv.className = "card";
+  function renderToys(toy){
+  // toys.forEach ((toy) =>{
+
       let h2Tag = document.createElement('h2');
-        h2Tag.innerHTML = toy["name"];
+        h2Tag.innerText = toy["name"];
       let imageTag= document.createElement("img");
         imageTag.src = toy["image"];
+        imageTag.className= "toy-avatar"
       let p = document.createElement('p');
-        p.innerHTML = toy["likes"];
+        p.innerText = toy["likes"];
       let button = document.createElement('button');
         button.className= "like-btn";
         button.innerText= "like";
-
-      cardDiv.appendChild(button);
-      cardDiv.appendChild(p);
-      cardDiv.appendChild(h2Tag);
-      cardDiv.appendChild(imageTag);
+        button.addEventListener("click", addLikes)
+      
+      let cardDiv = document.createElement('div');
+      cardDiv.className = "card";
+      cardDiv.append(h2Tag, imageTag, p, button);
       toyCollection.appendChild(cardDiv);
-    })
+    // })
   }
 
   function postToy(toy_data){
@@ -41,25 +41,19 @@ document.addEventListener("DOMContentLoaded", () => {
       method: 'POST',
       headers: {
         "Content-Type": "application/json",
-        "Accept": "application/json"
-      },
+        Accept: "application/json"
+      },   
       body: JSON.stringify({
-        "name" : toy_data["name"]
-        "image": toy_data["image"]
+        "name": toy_data["name"].value,
+        "image": toy_data["image"].value,
         "likes": 0
        
       })
-    }
+    })
     .then(response => response.json())
-    .then(toy_obj => {
-      renderToys(toy_obj)
-      })
-    }
-
-
-
-
-
+    .then(toy_obj => renderToys(toy_obj))
+  };
+  
 
 
   addBtn.addEventListener("click", () => {
@@ -67,10 +61,50 @@ document.addEventListener("DOMContentLoaded", () => {
     addToy = !addToy;
     if (addToy) {
       toyFormContainer.style.display = "block";
-      document.addEventListener("submit", postToy(e.target))
+      toyFormContainer.addEventListener("submit", function (e){
+        e.preventDefault();
+        postToy(e.target)
+      })
       
     } else {
       toyFormContainer.style.display = "none";
     }
   });
+
+  function addLikes(event){
+     event.preventDefault()
+     event.fetch("http://localhost:3000/toys/:id",{
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json"
+      },  
+      body: JSON.stringify({
+        "likes": like(event)
+      }
+      )
+      .then(function(response){
+        return response.json();
+      })
+      .then(function(obj){
+        console.log(obj)
+      })
+   })
+  }
+
+  function like(e){
+    // e.preventDefault()
+    console.log(e)
+    e.addEventListener("dbClick", function(){
+      e.target -= e.likes.count;
+    }) 
+    e.addEventListener("click", function(){
+      e.target += e.likes
+    })
+      
+    
+  }
+
+  function forEachToy(toys){toys.forEach((toy) => {renderToys(toy)})}
+
 });
